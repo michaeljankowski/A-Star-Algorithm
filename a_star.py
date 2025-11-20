@@ -7,13 +7,16 @@ import heapq
 #O(length of path * average number of direction(may or may not depend on how many "void spaces" or obstacles we add in the maze/grid))
 #CODE
 class Node:
-  def __init__(self, position, parent=None):
+    def __init__(self, position, parent=None):
         self.position = position
         self.parent = parent
 
         self.g = 0.0
         self.h = 0.0
         self.f = 0.0
+
+    def __lt__(self, other):
+        return self.f < other.f
 
 #this Node needs:
   #parent and position ... for now    /// position is in (x,y) format
@@ -23,7 +26,7 @@ class Node:
 # Similair to Dijsktra's but the value specified above ^ will make it run more efficiently instead of checking every single path
 
 
-def astar(grid, start, end) # main code 
+def astar(grid, start, end): # main code 
   openList = [] #
   closedList = []
   directions = [(0, -1), (0, 1), (-1, 0), (1, 0), (-1, -1), (-1, 1), (1, -1), (1, 1)]
@@ -94,7 +97,7 @@ def astar(grid, start, end) # main code
             heapq.heappush(openList, child)
             
 
-def helperfunction1() #add more helper functions as needed
+def helperfunction1(): #add more helper functions as needed
   pass
 #I don't think we need the sqrt cause I don't see how that would affect end results but safer to try it out wiht this and then maybe remove it
 def calculateH(coord1, coord2):
@@ -102,17 +105,16 @@ def calculateH(coord1, coord2):
     return math.sqrt((coord1[0] - coord2[0]) ** 2 + (coord1[1] - coord2[1]) ** 2)
 
 #....
-def main()
-  grid = [
+def main():
+    grid = [
         [0, 0, 0, 0, 0],
         [0, 1, 1, 1, 0],
         [0, 0, 0, 1, 0],
         [0, 1, 0, 0, 0],
         [0, 0, 0, 0, 0],
     ]
-
-    start = (0, 0)  # (x, y)
-    end = (4, 4)
+    start = (2, 2)  # (x, y)
+    end = (4, 1)
 
     path = astar(grid, start, end)
     print("Path:", path)
