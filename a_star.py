@@ -1,10 +1,12 @@
 import math
 import heapq
+import time
+import matplotlib.pyplot as plt
+from matplotlib.patches import Rectangle
 
 #DESCRIPTION
 #NOTE: since this algorithm is similair to djiktras with a heuristic approach, the time complexity will be O(nlogn) where n is x*y corresponding
-#with grid size we use for testing. But I think we need ot implement a priority queue for this. I think the best case scenario would be 
-#O(length of path * average number of direction(may or may not depend on how many "void spaces" or obstacles we add in the maze/grid))
+
 #CODE
 class Node:
     def __init__(self, position, parent=None):
@@ -18,12 +20,7 @@ class Node:
     def __lt__(self, other):
         return self.f < other.f
 
-#this Node needs:
-  #parent and position ... for now    /// position is in (x,y) format
-# a distance between the current node and the starting node as a value
-# heuristic distance from current node to end node: sqrt(a^2 +b^2)
-# a value for total cost of everything(the above two put together)
-# Similair to Dijsktra's but the value specified above ^ will make it run more efficiently instead of checking every single path
+
 
 
 def astar(grid, start, end): # main code 
@@ -31,9 +28,9 @@ def astar(grid, start, end): # main code
   closedList = []
   directions = [(0, -1), (0, 1), (-1, 0), (1, 0), (-1, -1), (-1, 1), (1, -1), (1, 1)]
   startNode = Node(start, None)
-  #create and initialize all the 3 values here for start node
+ 
   endNode = Node(end, None)
-  #create and initialize all the 3 values here for end node
+  
   startNode.g = 0.0
   startNode.h = calculateH(startNode.position, endNode.position)
   startNode.f = startNode.g + startNode.h
@@ -97,9 +94,43 @@ def astar(grid, start, end): # main code
             heapq.heappush(openList, child)
             
 
-def helperfunction1(): #add more helper functions as needed
-  pass
-#I don't think we need the sqrt cause I don't see how that would affect end results but safer to try it out wiht this and then maybe remove it
+def plot_path(grid, path, start, end, elapsed_time): #not part of algo
+    plt.figure(figsize=(6, 6))
+
+    rows = len(grid)
+    cols = len(grid[0])
+
+    ax = plt.gca()
+
+    #filled squares (white for open, gray for blocked)
+    for y in range(rows):
+        for x in range(cols):
+            color = "gray" if grid[y][x] != 0 else "white"
+            ax.add_patch(Rectangle((x - 0.5, y - 0.5), 1, 1, facecolor=color, edgecolor="black"))
+
+    # start and end squares
+    ax.add_patch(Rectangle((start[0] - 0.5, start[1] - 0.5), 1, 1, facecolor="green", edgecolor="black", label="Start"))
+    ax.add_patch(Rectangle((end[0] - 0.5, end[1] - 0.5), 1, 1, facecolor="red", edgecolor="black", label="End"))
+
+    # plot path through cell centers
+    if path:
+        px = [p[0] + 0 for p in path]
+        py = [p[1] + 0 for p in path]
+        ax.plot(px, py, color="black", linewidth=2, marker='o', markersize=6, label="Path")
+
+    ax.set_xlim(-0.5, cols - 0.5)
+    ax.set_ylim(rows - 0.5, -0.5)
+    ax.set_xticks(range(cols))
+    ax.set_yticks(range(rows))
+    ax.set_aspect('equal')
+    ax.grid(False)
+    ax.legend(loc="upper right")
+    ax.set_title(f"A* Pathfinding\nTime: {elapsed_time:.6f} seconds")
+    plt.tight_layout()
+    plt.show()
+    
+
+
 def calculateH(coord1, coord2):
     """sqrt[(x-x2)^2+(y-y2)]"""
     return math.sqrt((coord1[0] - coord2[0]) ** 2 + (coord1[1] - coord2[1]) ** 2)
@@ -107,17 +138,30 @@ def calculateH(coord1, coord2):
 #....
 def main():
     grid = [
-        [0, 0, 0, 0, 0],
-        [0, 1, 1, 1, 0],
-        [0, 0, 0, 1, 0],
-        [0, 1, 0, 0, 0],
-        [0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 1, 1, 0], 
+    [1, 1, 1, 1, 1, 1, 0, 1, 1, 0],  
+    [0, 0, 0, 0, 0, 1, 0, 0, 0, 0],  
+    [0, 1, 1, 1, 0, 1, 1, 1, 1, 0],  
+    [0, 1, 0, 0, 0, 0, 0, 0, 1, 0],  
+    [0, 1, 0, 1, 1, 1, 1, 0, 1, 0],  
+    [0, 1, 0, 0, 0, 0, 1, 0, 0, 0],  
+    [0, 1, 1, 1, 1, 0, 1, 1, 1, 0],  
+    [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],  
+    [0, 1, 1, 0, 1, 1, 1, 1, 1, 0], 
     ]
-    start = (2, 2)  # (x, y)
-    end = (4, 1)
 
+    start = (0, 9) 
+    end   = (9, 0) 
+
+    t0 = time.time()
     path = astar(grid, start, end)
+    t1 = time.time()
+    elapsed = t1 - t0
+
     print("Path:", path)
+    print(f"Runtime: {elapsed:.6f} seconds")
+
+    plot_path(grid, path, start, end, elapsed)
 
 
 if __name__ == "__main__":
@@ -125,4 +169,4 @@ if __name__ == "__main__":
     main()
 
   
-#add plots at end maybe
+
